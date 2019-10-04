@@ -36,7 +36,7 @@ def from_config(cls, config=None, custom_objects=None):
     print(inspect.getargspec(cls)[0])
     return cls(**config)
 
-optimizer_v2.OptimizerV2.from_config = from_config
+# optimizer_v2.OptimizerV2.from_config = from_config
 
 
 
@@ -155,6 +155,7 @@ def clone_and_build_model(
       optimizer_config = optimizer_config or orig_optimizer.get_config()
       print(orig_optimizer)
       print(orig_optimizer.__class__)
+      print(orig_optimizer.__class__.__init__)
       print(optimizer_config)
       print(inspect.getargspec(orig_optimizer.__class__)[0])
       optimizer = orig_optimizer.__class__.from_config(optimizer_config)
