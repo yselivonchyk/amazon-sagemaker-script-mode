@@ -5,6 +5,7 @@ import logging
 import numpy as np
 import os
 import re
+import subprocess
 
 import tensorflow as tf
 import tensorflow.keras.backend as K
@@ -122,10 +123,12 @@ def main(args):
     # Horovod: Save model and history only on worker 0 (i.e. master)
     if mpi:
         if hvd.rank() == 0:
-            save_history(args.model_dir + "/hvd_history.p", history)
+#             save_history(args.model_dir + "/hvd_history.p", history)
+            subprocess.call("rm -rf /opt/ml/model/*", shell=True)
             return save_model(model, args.model_output_dir)
     else:
-        save_history(args.model_dir + "/hvd_history.p", history)
+#         save_history(args.model_dir + "/hvd_history.p", history)
+        subprocess.call("rm -rf /opt/ml/model/*", shell=True)
         return save_model(model, args.model_output_dir)
 
 
