@@ -9,6 +9,7 @@ import numpy as np
 import os
 import re
 import subprocess
+import inspect 
 
 import tensorflow as tf
 import tensorflow.keras.backend as K
@@ -32,6 +33,7 @@ def from_config(cls, config=None, custom_objects=None):
         config['optimizer'], custom_objects=custom_objects)
     config['loss_scale'] = keras_loss_scale_module.deserialize(
         config['loss_scale'], custom_objects=custom_objects)
+    print(inspect.getargspec(cls)[0])
     return cls(**config)
 
 optimizer_v2.OptimizerV2.from_config = from_config
@@ -154,6 +156,7 @@ def clone_and_build_model(
       print(orig_optimizer)
       print(orig_optimizer.__class__)
       print(optimizer_config)
+      print(inspect.getargspec(orig_optimizer.__class__)[0])
       optimizer = orig_optimizer.__class__.from_config(optimizer_config)
       if optimizer_iterations is not None:
         optimizer.iterations = optimizer_iterations
