@@ -18,6 +18,24 @@ from model_def import get_model, HEIGHT, WIDTH, DEPTH, NUM_CLASSES
 from utilities import process_input
 
 
+from tensorflow.python.keras.optimizer_v2 import optimizer_v2
+print(tensorflow.keras.OptimizerV2.from_config)
+
+def from_config(cls, config, custom_objects=None):
+    print("What is going on here\n")
+    print(cls)
+    print(config)
+    print("Are you done?\n")
+    config = config.copy()  # Make a copy, since we mutate config
+    config['optimizer'] = optimizers.deserialize(
+        config['optimizer'], custom_objects=custom_objects)
+    config['loss_scale'] = keras_loss_scale_module.deserialize(
+        config['loss_scale'], custom_objects=custom_objects)
+    return cls(**config)
+
+tensorflow.keras.OptimizerV2.from_config = from_config
+
+
 logging.getLogger().setLevel(logging.INFO)
 tf.logging.set_verbosity(tf.logging.ERROR)
 
