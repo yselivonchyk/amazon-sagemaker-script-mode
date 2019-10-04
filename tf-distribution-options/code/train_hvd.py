@@ -17,7 +17,7 @@ from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
 from model_def import get_model, HEIGHT, WIDTH, DEPTH, NUM_CLASSES
 from utilities import process_input
 
-
+import tensorflow
 from tensorflow.python.keras.optimizer_v2 import optimizer_v2
 print(tensorflow.keras.OptimizerV2.from_config)
 
