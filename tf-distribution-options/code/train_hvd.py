@@ -17,24 +17,24 @@ from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
 from model_def import get_model, HEIGHT, WIDTH, DEPTH, NUM_CLASSES
 from utilities import process_input
 
-# import tensorflow
-# from tensorflow.python.keras.optimizer_v2 import optimizer_v2
-# print(optimizer_v2.OptimizerV2.from_config)
+import tensorflow
+from tensorflow.python.keras.optimizer_v2 import optimizer_v2
+print(optimizer_v2.OptimizerV2.from_config)
 
-# def from_config(cls, config=None, custom_objects=None):
-#     print("What is going on here\n")
-#     assert False, cls
-#     print(cls)
-#     print(config)
-#     print("Are you done?\n")
-#     config = config.copy()  # Make a copy, since we mutate config
-#     config['optimizer'] = optimizers.deserialize(
-#         config['optimizer'], custom_objects=custom_objects)
-#     config['loss_scale'] = keras_loss_scale_module.deserialize(
-#         config['loss_scale'], custom_objects=custom_objects)
-#     return cls(**config)
+def from_config(cls, config=None, custom_objects=None):
+    print("What is going on here\n")
+    assert False, cls
+    print(cls)
+    print(config)
+    print("Are you done?\n")
+    config = config.copy()  # Make a copy, since we mutate config
+    config['optimizer'] = optimizers.deserialize(
+        config['optimizer'], custom_objects=custom_objects)
+    config['loss_scale'] = keras_loss_scale_module.deserialize(
+        config['loss_scale'], custom_objects=custom_objects)
+    return cls(**config)
 
-# optimizer_v2.OptimizerV2.from_config = from_config
+optimizer_v2.OptimizerV2.from_config = from_config
 
 
 
@@ -206,6 +206,10 @@ def save_history(path, history):
 def save_model(model, output):
 
     # create a TensorFlow SavedModel for deployment to a SageMaker endpoint with TensorFlow Serving
+    print("\n\n")
+    print(model.optimizer)
+    print(model.optimizer.__init__)
+    print("\n\n")
     tf.contrib.saved_model.save_keras_model(model, args.model_dir)
     logging.info("Model successfully saved at: {}".format(output))
     return
