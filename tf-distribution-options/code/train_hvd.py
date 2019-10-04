@@ -19,7 +19,7 @@ from utilities import process_input
 
 import tensorflow
 from tensorflow.python.keras.optimizer_v2 import optimizer_v2
-print(tensorflow.keras.OptimizerV2.from_config)
+print(optimizer_v2.OptimizerV2.from_config)
 
 def from_config(cls, config, custom_objects=None):
     print("What is going on here\n")
@@ -33,7 +33,7 @@ def from_config(cls, config, custom_objects=None):
         config['loss_scale'], custom_objects=custom_objects)
     return cls(**config)
 
-tensorflow.keras.OptimizerV2.from_config = from_config
+optimizer_v2.OptimizerV2.from_config = from_config
 
 
 logging.getLogger().setLevel(logging.INFO)
