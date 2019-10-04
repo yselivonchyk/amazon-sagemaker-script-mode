@@ -17,24 +17,147 @@ from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
 from model_def import get_model, HEIGHT, WIDTH, DEPTH, NUM_CLASSES
 from utilities import process_input
 
-import tensorflow
-from tensorflow.python.keras.optimizer_v2 import optimizer_v2
-print(optimizer_v2.OptimizerV2.from_config)
+# import tensorflow
+# from tensorflow.python.keras.optimizer_v2 import optimizer_v2
+# print(optimizer_v2.OptimizerV2.from_config)
 
-def from_config(cls, config=None, custom_objects=None):
-    print("What is going on here\n")
-    assert False, cls
-    print(cls)
-    print(config)
-    print("Are you done?\n")
-    config = config.copy()  # Make a copy, since we mutate config
-    config['optimizer'] = optimizers.deserialize(
-        config['optimizer'], custom_objects=custom_objects)
-    config['loss_scale'] = keras_loss_scale_module.deserialize(
-        config['loss_scale'], custom_objects=custom_objects)
-    return cls(**config)
+# def from_config(cls, config=None, custom_objects=None):
+#     print("What is going on here\n")
+#     assert False, cls
+#     print(cls)
+#     print(config)
+#     print("Are you done?\n")
+#     config = config.copy()  # Make a copy, since we mutate config
+#     config['optimizer'] = optimizers.deserialize(
+#         config['optimizer'], custom_objects=custom_objects)
+#     config['loss_scale'] = keras_loss_scale_module.deserialize(
+#         config['loss_scale'], custom_objects=custom_objects)
+#     return cls(**config)
 
-optimizer_v2.OptimizerV2.from_config = from_config
+# optimizer_v2.OptimizerV2.from_config = from_config
+
+
+
+from tensorflow.python.keras import backend as K
+from tensorflow.python.keras import metrics as metrics_module
+from tensorflow.python.keras import optimizers
+from tensorflow.python.keras import saving
+from tensorflow.python.keras.engine import sequential
+from tensorflow.python.keras.engine import training
+from tensorflow.python.keras.engine.base_layer import Layer
+from tensorflow.python.keras.engine.input_layer import Input
+from tensorflow.python.keras.engine.input_layer import InputLayer
+from tensorflow.python.keras.engine.network import Network
+from tensorflow.python.keras.utils import generic_utils
+from tensorflow.python.keras.utils.generic_utils import CustomObjectScope
+from tensorflow.python.util import nest
+from tensorflow.python.util.tf_export import keras_export
+
+def clone_and_build_model(
+    model, input_tensors=None, target_tensors=None, custom_objects=None,
+    compile_clone=True, in_place_reset=False, optimizer_iterations=None,
+    optimizer_config=None):
+  """Clone a `Model` and build/compile it with the same settings used before.
+  This function can be be run in the same graph or in a separate graph from the
+  model. When using a separate graph, `in_place_reset` must be `False`.
+  Note that, currently, the clone produced from this function may not work with
+  TPU DistributionStrategy. Try at your own risk.
+  Args:
+    model: `tf.keras.Model` object. Can be Functional, Sequential, or
+      sub-classed.
+    input_tensors: Optional list of input tensors to build the model upon. If
+      not provided, placeholders will be created.
+    target_tensors: Optional list of target tensors for compiling the model. If
+      not provided, placeholders will be created.
+    custom_objects: Optional dictionary mapping string names to custom classes
+      or functions.
+    compile_clone: Boolean, whether to compile model clone (default `True`).
+    in_place_reset: Boolean, whether to reset the model in place. Only used if
+      the model is a subclassed model. In the case of a subclassed model,
+      this argument must be set to `True` (default `False`). To restore the
+      original model, use the function
+      `in_place_subclassed_model_state_restoration(model)`.
+    optimizer_iterations: An iterations variable that will be incremented by the
+      optimizer if the clone is compiled. This argument is used when a Keras
+      model is cloned into an Estimator model function, because Estimators
+      create their own global step variable.
+    optimizer_config: Optimizer config dictionary returned from `get_config()`.
+      This argument should be defined if `clone_and_build_model` is called in
+      a different graph or session from the original model, and the optimizer is
+      an instance of `OptimizerV2`.
+  Returns:
+    Clone of the model.
+  Raises:
+    ValueError: Cloning fails in the following cases
+      - cloning a subclassed model with `in_place_reset` set to False.
+      - compiling the clone when the original model has not been compiled.
+  """
+  # Grab optimizer now, as we reset-in-place for subclassed models, but
+  # want to maintain access to the original optimizer.
+  orig_optimizer = model.optimizer
+  if compile_clone and not orig_optimizer:
+    raise ValueError(
+        'Error when cloning model: compile_clone was set to True, but the '
+        'original model has not been compiled.')
+
+  if model._is_graph_network or isinstance(model, Sequential):
+    if custom_objects:
+      with CustomObjectScope(custom_objects):
+        clone = clone_model(model, input_tensors=input_tensors)
+    else:
+      clone = clone_model(model, input_tensors=input_tensors)
+
+    if all([isinstance(clone, Sequential),
+            not clone._is_graph_network,
+            getattr(model, '_build_input_shape', None) is not None]):
+      # Set model inputs to build the model and add input/output properties.
+      # TODO(kathywu): Add multiple placeholders to handle edge case where
+      # sequential model has multiple inputs.
+      clone._set_inputs(
+          K.placeholder(model._build_input_shape, dtype=model.inputs[0].dtype))
+  else:
+    if not in_place_reset:
+      raise ValueError(
+          'This model is a subclassed model. '
+          'Such a model cannot be cloned, but there is a workaround where '
+          'the model is reset in-place. To use this, please set the argument '
+          '`in_place_reset` to `True`. This will reset the attributes in the '
+          'original model. To restore the attributes, call '
+          '`in_place_subclassed_model_state_restoration(model)`.')
+    clone = model
+    _in_place_subclassed_model_reset(clone)
+    if input_tensors is not None:
+      if isinstance(input_tensors, (list, tuple)) and len(input_tensors) == 1:
+        input_tensors = input_tensors[0]
+      clone._set_inputs(input_tensors)
+
+  if compile_clone:
+    if isinstance(orig_optimizer, optimizers.TFOptimizer):
+      optimizer = optimizers.TFOptimizer(
+          orig_optimizer.optimizer, optimizer_iterations)
+      K.track_tf_optimizer(optimizer)
+    else:
+      optimizer_config = optimizer_config or orig_optimizer.get_config()
+      print(orig_optimizer)
+      print(orig_optimizer.__class__)
+      print(optimizer_config)
+      optimizer = orig_optimizer.__class__.from_config(optimizer_config)
+      if optimizer_iterations is not None:
+        optimizer.iterations = optimizer_iterations
+
+    clone.compile(
+        optimizer,
+        model.loss,
+        metrics=metrics_module.clone_metrics(model._compile_metrics),
+        loss_weights=model.loss_weights,
+        sample_weight_mode=model.sample_weight_mode,
+        weighted_metrics=metrics_module.clone_metrics(
+            model._compile_weighted_metrics),
+        target_tensors=target_tensors)
+  return clone
+
+from tensorflow.python.keras import models
+models.clone_and_build_model = clone_and_build_model
 
 
 logging.getLogger().setLevel(logging.INFO)
