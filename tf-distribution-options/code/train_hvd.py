@@ -55,6 +55,17 @@ from tensorflow.python.util.tf_export import keras_export
 
 from tensorflow.python.keras import models
 
+
+# API entries importable from `keras.models`:
+Model = training.Model  # pylint: disable=invalid-name
+Sequential = sequential.Sequential  # pylint: disable=invalid-name
+save_model = saving.save_model
+load_model = saving.load_model
+model_from_config = saving.model_from_config
+model_from_yaml = saving.model_from_yaml
+model_from_json = saving.model_from_json
+
+
 def clone_and_build_model(
     model, input_tensors=None, target_tensors=None, custom_objects=None,
     compile_clone=True, in_place_reset=False, optimizer_iterations=None,
