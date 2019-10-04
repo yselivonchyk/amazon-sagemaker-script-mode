@@ -53,6 +53,8 @@ from tensorflow.python.keras.utils.generic_utils import CustomObjectScope
 from tensorflow.python.util import nest
 from tensorflow.python.util.tf_export import keras_export
 
+from tensorflow.python.keras import models
+
 def clone_and_build_model(
     model, input_tensors=None, target_tensors=None, custom_objects=None,
     compile_clone=True, in_place_reset=False, optimizer_iterations=None,
@@ -103,9 +105,9 @@ def clone_and_build_model(
   if model._is_graph_network or isinstance(model, Sequential):
     if custom_objects:
       with CustomObjectScope(custom_objects):
-        clone = clone_model(model, input_tensors=input_tensors)
+        clone = models.clone_model(model, input_tensors=input_tensors)
     else:
-      clone = clone_model(model, input_tensors=input_tensors)
+      clone = models.clone_model(model, input_tensors=input_tensors)
 
     if all([isinstance(clone, Sequential),
             not clone._is_graph_network,
@@ -145,7 +147,7 @@ def clone_and_build_model(
       if optimizer_iterations is not None:
         optimizer.iterations = optimizer_iterations
 
-    clone.compile(
+    models.clone.compile(
         optimizer,
         model.loss,
         metrics=metrics_module.clone_metrics(model._compile_metrics),
@@ -156,7 +158,6 @@ def clone_and_build_model(
         target_tensors=target_tensors)
   return clone
 
-from tensorflow.python.keras import models
 models.clone_and_build_model = clone_and_build_model
 
 
