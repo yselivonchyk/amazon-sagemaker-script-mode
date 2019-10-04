@@ -21,7 +21,7 @@ import tensorflow
 from tensorflow.python.keras.optimizer_v2 import optimizer_v2
 print(optimizer_v2.OptimizerV2.from_config)
 
-def from_config(cls, config, custom_objects=None):
+def from_config(cls, config=None, custom_objects=None):
     print("What is going on here\n")
     assert False, cls
     print(cls)
