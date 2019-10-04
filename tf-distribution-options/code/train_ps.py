@@ -99,7 +99,7 @@ def main(args):
     # PS: Save model and history only on worker 0
     if args.current_host == args.hosts[0]:
         #save_history(args.model_dir + "/ps_history.p", history)
-        subprocess.call("rm -rf /opt/ml/model/*", , shell=True)
+        subprocess.call("rm -rf /opt/ml/model/*", shell=True)
         save_model(model, args.model_dir)
 
 
