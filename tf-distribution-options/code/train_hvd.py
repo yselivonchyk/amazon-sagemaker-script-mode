@@ -23,7 +23,7 @@ print(optimizer_v2.OptimizerV2.from_config)
 
 def from_config(cls, config=None, custom_objects=None):
     print("What is going on here\n")
-    assert False, cls
+#     assert False, cls
     print(cls)
     print(config)
     print("Are you done?\n")
