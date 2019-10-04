@@ -72,41 +72,6 @@ def clone_and_build_model(
     model, input_tensors=None, target_tensors=None, custom_objects=None,
     compile_clone=True, in_place_reset=False, optimizer_iterations=None,
     optimizer_config=None):
-  """Clone a `Model` and build/compile it with the same settings used before.
-  This function can be be run in the same graph or in a separate graph from the
-  model. When using a separate graph, `in_place_reset` must be `False`.
-  Note that, currently, the clone produced from this function may not work with
-  TPU DistributionStrategy. Try at your own risk.
-  Args:
-    model: `tf.keras.Model` object. Can be Functional, Sequential, or
-      sub-classed.
-    input_tensors: Optional list of input tensors to build the model upon. If
-      not provided, placeholders will be created.
-    target_tensors: Optional list of target tensors for compiling the model. If
-      not provided, placeholders will be created.
-    custom_objects: Optional dictionary mapping string names to custom classes
-      or functions.
-    compile_clone: Boolean, whether to compile model clone (default `True`).
-    in_place_reset: Boolean, whether to reset the model in place. Only used if
-      the model is a subclassed model. In the case of a subclassed model,
-      this argument must be set to `True` (default `False`). To restore the
-      original model, use the function
-      `in_place_subclassed_model_state_restoration(model)`.
-    optimizer_iterations: An iterations variable that will be incremented by the
-      optimizer if the clone is compiled. This argument is used when a Keras
-      model is cloned into an Estimator model function, because Estimators
-      create their own global step variable.
-    optimizer_config: Optimizer config dictionary returned from `get_config()`.
-      This argument should be defined if `clone_and_build_model` is called in
-      a different graph or session from the original model, and the optimizer is
-      an instance of `OptimizerV2`.
-  Returns:
-    Clone of the model.
-  Raises:
-    ValueError: Cloning fails in the following cases
-      - cloning a subclassed model with `in_place_reset` set to False.
-      - compiling the clone when the original model has not been compiled.
-  """
   # Grab optimizer now, as we reset-in-place for subclassed models, but
   # want to maintain access to the original optimizer.
   orig_optimizer = model.optimizer
@@ -157,7 +122,7 @@ def clone_and_build_model(
       print(orig_optimizer.__class__)
       print(orig_optimizer.__class__.__init__)
       print(optimizer_config)
-      print(inspect.getargspec(orig_optimizer.__class__)[0])
+      print(inspect.getargspec(orig_optimizer.__class__.__init__))
       optimizer = orig_optimizer.__class__.from_config(optimizer_config)
       if optimizer_iterations is not None:
         optimizer.iterations = optimizer_iterations
