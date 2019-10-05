@@ -38,12 +38,13 @@ def from_config(cls, config=None, custom_objects=None):
 
 # optimizer_v2.OptimizerV2.from_config = from_config
 
+from tensorflow.python.keras import models
 
 
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras import metrics as metrics_module
 from tensorflow.python.keras import optimizers
-from tensorflow.python.keras.engine import saving
+from tensorflow.python.keras import saving
 from tensorflow.python.keras.engine import sequential
 from tensorflow.python.keras.engine import training
 from tensorflow.python.keras.engine.base_layer import Layer
@@ -52,7 +53,8 @@ from tensorflow.python.keras.engine.input_layer import InputLayer
 from tensorflow.python.keras.engine.network import Network
 from tensorflow.python.keras.utils import generic_utils
 from tensorflow.python.keras.utils.generic_utils import CustomObjectScope
-from tensorflow.python.util.tf_export import tf_export
+from tensorflow.python.util import nest
+from tensorflow.python.util.tf_export import keras_export
 
 # API entries importable from `keras.models`:
 Model = training.Model  # pylint: disable=invalid-name
@@ -62,34 +64,6 @@ load_model = saving.load_model
 model_from_config = saving.model_from_config
 model_from_yaml = saving.model_from_yaml
 model_from_json = saving.model_from_json
-
-
-from tensorflow.python.keras import models
-
-
-# from tensorflow.python.keras import backend as K
-# from tensorflow.python.keras import metrics as metrics_module
-# from tensorflow.python.keras import optimizers
-# from tensorflow.python.keras import saving
-# from tensorflow.python.keras.engine import sequential
-# from tensorflow.python.keras.engine import training
-# from tensorflow.python.keras.engine.base_layer import Layer
-# from tensorflow.python.keras.engine.input_layer import Input
-# from tensorflow.python.keras.engine.input_layer import InputLayer
-# from tensorflow.python.keras.engine.network import Network
-# from tensorflow.python.keras.utils import generic_utils
-# from tensorflow.python.keras.utils.generic_utils import CustomObjectScope
-# from tensorflow.python.util import nest
-# from tensorflow.python.util.tf_export import keras_export
-
-# # API entries importable from `keras.models`:
-# Model = training.Model  # pylint: disable=invalid-name
-# Sequential = sequential.Sequential  # pylint: disable=invalid-name
-# save_model = saving.save_model
-# load_model = saving.load_model
-# model_from_config = saving.model_from_config
-# model_from_yaml = saving.model_from_yaml
-# model_from_json = saving.model_from_json
 
 
 def clone_and_build_model(
@@ -151,63 +125,6 @@ def clone_and_build_model(
             model._compile_weighted_metrics),
         target_tensors=target_tensors)
   return clone
-
-
-def clone_and_build_model(
-    model, input_tensors=None, target_tensors=None, custom_objects=None,
-    compile_clone=True, in_place_reset=False, optimizer_iterations=None):
-  """1.13"""
-  if compile_clone and not model.optimizer:
-    raise ValueError(
-        'Error when cloning model: compile_clone was set to True, but the '
-        'original model has not been compiled.')
-
-  if model._is_graph_network or isinstance(model, Sequential):
-    if custom_objects:
-      with CustomObjectScope(custom_objects):
-        clone = models.clone_model(model, input_tensors=input_tensors)
-    else:
-      clone = models.clone_model(model, input_tensors=input_tensors)
-
-    if all([isinstance(clone, Sequential),
-            not models.clone._is_graph_network,
-            getattr(model, '_build_input_shape', None) is not None]):
-      clone._set_inputs(
-          K.placeholder(model._build_input_shape, dtype=model.inputs[0].dtype))
-  else:
-    if not in_place_reset:
-      raise ValueError('.')
-    clone = model
-    _in_place_subclassed_model_reset(clone)
-    if input_tensors is not None:
-      if isinstance(input_tensors, (list, tuple)) and len(input_tensors) == 1:
-        input_tensors = input_tensors[0]
-      models.clone._set_inputs(input_tensors)
-
-  if compile_clone and model.optimizer:
-    if isinstance(model.optimizer, optimizers.TFOptimizer):
-      optimizer = optimizers.TFOptimizer(
-          model.optimizer.optimizer, optimizer_iterations)
-      K.track_tf_optimizer(optimizer)
-    else:
-      optimizer_config = model.optimizer.get_config()
-      optimizer = model.optimizer.__class__.from_config(optimizer_config)
-      if optimizer_iterations is not None:
-        optimizer.iterations = optimizer_iterations
-
-    models.clone.compile(
-        optimizer,
-        model.loss,
-        metrics=metrics_module.clone_metrics(model._compile_metrics),
-        loss_weights=model.loss_weights,
-        sample_weight_mode=model.sample_weight_mode,
-        weighted_metrics=metrics_module.clone_metrics(
-            model._compile_weighted_metrics),
-        target_tensors=target_tensors)
-
-  return clone
-
-
 
 models.clone_and_build_model = clone_and_build_model
 
