@@ -43,7 +43,7 @@ def from_config(cls, config=None, custom_objects=None):
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras import metrics as metrics_module
 from tensorflow.python.keras import optimizers
-from tensorflow.python.keras import saving
+from tensorflow.python.keras.engine import saving
 from tensorflow.python.keras.engine import sequential
 from tensorflow.python.keras.engine import training
 from tensorflow.python.keras.engine.base_layer import Layer
@@ -52,11 +52,7 @@ from tensorflow.python.keras.engine.input_layer import InputLayer
 from tensorflow.python.keras.engine.network import Network
 from tensorflow.python.keras.utils import generic_utils
 from tensorflow.python.keras.utils.generic_utils import CustomObjectScope
-from tensorflow.python.util import nest
-from tensorflow.python.util.tf_export import keras_export
-
-from tensorflow.python.keras import models
-
+from tensorflow.python.util.tf_export import tf_export
 
 # API entries importable from `keras.models`:
 Model = training.Model  # pylint: disable=invalid-name
@@ -66,6 +62,34 @@ load_model = saving.load_model
 model_from_config = saving.model_from_config
 model_from_yaml = saving.model_from_yaml
 model_from_json = saving.model_from_json
+
+
+from tensorflow.python.keras import models
+
+
+# from tensorflow.python.keras import backend as K
+# from tensorflow.python.keras import metrics as metrics_module
+# from tensorflow.python.keras import optimizers
+# from tensorflow.python.keras import saving
+# from tensorflow.python.keras.engine import sequential
+# from tensorflow.python.keras.engine import training
+# from tensorflow.python.keras.engine.base_layer import Layer
+# from tensorflow.python.keras.engine.input_layer import Input
+# from tensorflow.python.keras.engine.input_layer import InputLayer
+# from tensorflow.python.keras.engine.network import Network
+# from tensorflow.python.keras.utils import generic_utils
+# from tensorflow.python.keras.utils.generic_utils import CustomObjectScope
+# from tensorflow.python.util import nest
+# from tensorflow.python.util.tf_export import keras_export
+
+# # API entries importable from `keras.models`:
+# Model = training.Model  # pylint: disable=invalid-name
+# Sequential = sequential.Sequential  # pylint: disable=invalid-name
+# save_model = saving.save_model
+# load_model = saving.load_model
+# model_from_config = saving.model_from_config
+# model_from_yaml = saving.model_from_yaml
+# model_from_json = saving.model_from_json
 
 
 def clone_and_build_model(
