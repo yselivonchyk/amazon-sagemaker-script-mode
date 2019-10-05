@@ -123,6 +123,7 @@ def clone_and_build_model(
       print(orig_optimizer.__class__.__init__)
       print(optimizer_config)
       print(inspect.getargspec(orig_optimizer.__class__.__init__))
+      print(orig_optimizer.__class__.__dict__)
       optimizer = orig_optimizer.__class__.from_config(optimizer_config)
       if optimizer_iterations is not None:
         optimizer.iterations = optimizer_iterations
