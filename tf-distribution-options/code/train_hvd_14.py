@@ -125,7 +125,7 @@ def clone_and_build_model(
       if optimizer_iterations is not None:
         optimizer.iterations = optimizer_iterations
 
-    models.clone.compile(
+    clone.compile(
         optimizer,
         model.loss,
         metrics=metrics_module.clone_metrics(model._compile_metrics),
