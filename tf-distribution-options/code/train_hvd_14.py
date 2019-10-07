@@ -112,7 +112,16 @@ def clone_and_build_model(
       print("orig_optimizer.c.i.args :", inspect.getargspec(orig_optimizer.__class__.__init__))
       print("orig_optimizer.c.i.dict :", orig_optimizer.__class__.__dict__)
       print("orig_optimizer.c._b_ .  :", orig_optimizer.__class__.__bases__)
-      optimizer = orig_optimizer.__class__.from_config(optimizer_config)
+#orig_optimizer          : <horovod._keras.Adam object at 0x7f803812aac8>
+#orig_optimizer.c .      : <class 'horovod._keras.Adam'>
+#orig_optimizer.c.i .    : <function create_distributed_optimizer.<locals>._DistributedOptimizer.__init__ at 0x7f80480840d0>
+#optimizer_config        : {'name': 'Adam', 'learning_rate': 0.0014000001, 'decay': 0.0002, 'beta_1': 0.9, 'beta_2': 0.999, 'epsilon': 1e-07, 'amsgrad': False}
+#orig_optimizer.c.i.args : ArgSpec(args=['self', 'name', 'device_dense', 'device_sparse', 'compression', 'sparse_as_dense', 'config'], varargs=None, keywords=None, defaults=None)
+#orig_optimizer.c.i.dict : {'__module__': 'horovod._keras', '__init__': <function create_distributed_optimizer.<locals>._DistributedOptimizer.__init__ at 0x7f80480840d0>, 'get_gradients': <function create_distributed_optimizer.<locals>._DistributedOptimizer.get_gradients at 0x7f80480847b8>, '__doc__': None, '__abstractmethods__': frozenset(), '_abc_registry': <_weakrefset.WeakSet object at 0x7f8038112cf8>, '_abc_cache': <_weakrefset.WeakSet object at 0x7f803812ac50>, '_abc_negative_cache': <_weakrefset.WeakSet object at 0x7f803812a6d8>, '_abc_negative_cache_version': 51}  
+      if "horovod._keras" not in str(type(orig_optimizer)):
+        optimizer = orig_optimizer.__class__.from_config(optimizer_config)
+      else:
+        optimizer = orig_optimizer.__class__.__bases__[0].from_config(optimizer_config)
       if optimizer_iterations is not None:
         optimizer.iterations = optimizer_iterations
 
