@@ -105,12 +105,12 @@ def clone_and_build_model(
       K.track_tf_optimizer(optimizer)
     else:
       optimizer_config = optimizer_config or orig_optimizer.get_config()
-      print(orig_optimizer)
-      print(orig_optimizer.__class__)
-      print(orig_optimizer.__class__.__init__)
-      print(optimizer_config)
-      print(inspect.getargspec(orig_optimizer.__class__.__init__))
-      print(orig_optimizer.__class__.__dict__)
+      print("orig_optimizer          :", orig_optimizer)
+      print("orig_optimizer.c .      :",orig_optimizer.__class__)
+      print("orig_optimizer.c.i .    :", orig_optimizer.__class__.__init__)
+      print("optimizer_config        :", optimizer_config)
+      print("orig_optimizer.c.i.args :", inspect.getargspec(orig_optimizer.__class__.__init__))
+      print("orig_optimizer.c.i.dict :", orig_optimizer.__class__.__dict__)
       optimizer = orig_optimizer.__class__.from_config(optimizer_config)
       if optimizer_iterations is not None:
         optimizer.iterations = optimizer_iterations
